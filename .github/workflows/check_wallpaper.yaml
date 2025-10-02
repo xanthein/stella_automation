@@ -32,4 +32,4 @@ jobs:
           fetch-depth: 0
       - name: Check wallpaper
         run: |
-          python3 check_wallpaper.py --exclude wallpaper_check_exclude
+          python3 check_wallpaper.py --mm_webhook ${{ secrets.MM_WEBHOOK }} --exclude wallpaper_check_exclude

@@ -8,16 +8,15 @@ import requests
 from requests.exceptions import HTTPError
 
 LOGFILE='/tmp/check_wallpaper.log'
-MM_WEB_HOOK='https://chat.canonical.com/hooks/4z7hf5g5fjgtpbsgcaozinm3ro'
 
-def send_to_mm(data: str):
+def send_to_mm(mm_webhook:str, data: str):
     headers = {
         "Content-Type": "application/json",
     }
 
     json_data = json.dumps({'text': data})
     try:
-        response = requests.post(MM_WEB_HOOK, data=json_data, headers=headers)
+        response = requests.post(mm_webhook, data=json_data, headers=headers)
         response.raise_for_status()
     except HTTPError as http_err:
         # This catches 4xx (Client Error) and 5xx (Server Error) status codes
@@ -57,6 +56,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--exclude', dest='exclude_file', action='store', help='File store the exclude platforms')
+    parser.add_argument('--mm_webhook', dest='mm_webhook', action='store', help='Mattermost WEB hook')
     args = parser.parse_args()
 
     exclude_list = []
@@ -72,5 +72,5 @@ if __name__ == '__main__':
 
     if len(failed_list) > 0:
         data = "Meta package not recommends wallpaper\n" + "\n".join(failed_list)
-        send_to_mm(data)
+        send_to_mm(args.mm_webhook, data)
 
