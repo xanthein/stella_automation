@@ -1,0 +1,35 @@
+name: Check wallpaper
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check the wallpaper in recommends
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install python3-full
+      - name: setup repo
+        run: |
+          gpg --keyserver keyserver.ubuntu.com --recv-keys ${{ secrets.GPG_KEY }}
+          gpg --export ${{ secrets.GPG_KEY }} > /etc/apt/keyrings/stella_ppa.gpg
+          cat > /etc/apt/sources.list.d/stella.sources << EOF
+          Types: deb
+          URIs: https://dirksu:${{ secrets.STELLA_PPA_PASSWORD }}@private-ppa.launchpadcontent.net/oem-archive/stella/ubuntu
+          Suites: noble
+          Components: main
+          Signed-by: /etc/apt/keyrings/stella_ppa.gpg
+          EOF
+          apt update
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check wallpaper
+        run: |
+          python3 check_wallpaper.py
